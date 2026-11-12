@@ -6,10 +6,11 @@ Players suggest ideas and vote on what you build next, on the web or straight fr
 
 - **Unlimited players and votes.** No tracked-user limits, no per-seat pricing.
 - **Discord-first.** Players sign in with Discord; slash commands are on the way.
+- **Fewer duplicates.** Similar ideas are suggested while players type.
 - **Your game's brand.** Your name, logo and accent colour throughout.
 - **Self-host in minutes** on Vercel or any server with Docker.
 
-> **Status: early development.** Phase 1 (setup, sign-in, branding, categories) is done. Posting and voting, the roadmap, and Discord commands are next. See the [roadmap](#roadmap).
+> **Status: early development.** Players can post, vote, comment and search. Moderation, the public roadmap and Discord commands are next. See the [roadmap](#roadmap).
 
 ---
 
@@ -101,7 +102,7 @@ Open http://localhost:3000. After changing `src/db/schema.ts`, run `npm run db:g
 ## Roadmap
 
 1. **Foundation** ✅ setup, Discord and email sign-in, branding, categories
-2. **Board:** post ideas, vote, comment, filter and search
+2. **Board** ✅ post ideas, vote, comment, filter and search, similar-idea hints
 3. **Admin and roadmap:** moderation inbox, statuses, merging duplicates, roadmap and releases
 4. **Discord:** `/rally suggest`, `/rally vote`, `/rally top`, status announcements
 5. **Packaging:** public demo, one-click deploy, screenshots
