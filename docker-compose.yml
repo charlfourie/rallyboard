@@ -1,0 +1,38 @@
+# Runs Rallyboard and Postgres on any server with Docker.
+#   1. cp .env.example .env   and fill in AUTH_SECRET, AUTH_URL and the Discord values
+#   2. docker compose up -d
+# The DATABASE_URL in .env is ignored here; the app talks to the bundled database.
+
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://rallyboard:${POSTGRES_PASSWORD:-rallyboard}@db:5432/rallyboard
+    ports:
+      - "${PORT:-3000}:3000"
+    volumes:
+      - uploads:/app/data
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: rallyboard
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-rallyboard}
+      POSTGRES_DB: rallyboard
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rallyboard"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pgdata:
+  uploads:
