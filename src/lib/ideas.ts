@@ -18,8 +18,9 @@ export type BoardFilters = {
 /** Ideas that should appear publicly: not hidden by a moderator, not merged away. */
 const visible = and(eq(ideas.hidden, false), isNull(ideas.mergedIntoId));
 
-// Votes decay with age so newer ideas with momentum rise (similar to Hacker News).
-const trendingScore = sql`(${ideas.voteCount} + 1) / power(extract(epoch from (now() - ${ideas.createdAt})) / 3600 + 2, 1.3)`;
+// Trending = most votes received in the last 7 days, so ideas with momentum rise
+// whatever their age, and a brand-new idea needs real support to get there.
+const trendingScore = sql`(select count(*) from ${votes} where ${votes.ideaId} = ${ideas.id} and ${votes.createdAt} > now() - interval '7 days')`;
 
 function escapeLike(text: string) {
   return text.replace(/[\\%_]/g, (c) => `\\${c}`);

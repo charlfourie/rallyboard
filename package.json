@@ -7,11 +7,12 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "vercel-build": "node scripts/migrate.mjs && next build",
+    "vercel-build": "node scripts/migrate.mjs && node scripts/seed-demo.mjs --if-enabled && next build",
     "start": "next start",
     "lint": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "node scripts/migrate.mjs"
+    "db:migrate": "node scripts/migrate.mjs",
+    "db:seed-demo": "node scripts/seed-demo.mjs"
   },
   "engines": {
     "node": ">=20"

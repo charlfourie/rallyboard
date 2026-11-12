@@ -95,7 +95,9 @@ npm run db:migrate
 npm run dev
 ```
 
-Open http://localhost:3000. After changing `src/db/schema.ts`, run `npm run db:generate` to create a migration, then `npm run db:migrate`.
+Open http://localhost:3000. To fill a board with sample content for a fictional game, run `npm run db:seed-demo` (add `-- --reset` to rebuild it). Demo players can't sign in, and real posts are left alone. On Vercel, setting `DEMO_SEED=true` runs this before each build.
+
+After changing `src/db/schema.ts`, run `npm run db:generate` to create a migration, then `npm run db:migrate`.
 
 **Stack:** Next.js (App Router) · TypeScript · Postgres with Drizzle ORM · Auth.js · Tailwind CSS.
 
