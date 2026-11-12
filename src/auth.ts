@@ -64,7 +64,9 @@ async function maybeClaimOwner(userId: string) {
 function buildConfig(): NextAuthConfig {
   const db = getDb();
 
-  const providers: NextAuthConfig["providers"] = [Discord];
+  // Discord adds an `iss` parameter to OAuth redirects (RFC 9207). Auth.js
+  // checks it against the provider's issuer, so declare Discord's own.
+  const providers: NextAuthConfig["providers"] = [Discord({ issuer: "https://discord.com" })];
   if (emailEnabled) {
     providers.push(
       Nodemailer({
