@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { requireRole } from "@/lib/session";
 import { notFound } from "next/navigation";
 import { getSettings } from "@/lib/settings";
 import { SettingsForm } from "./settings-form";
@@ -10,6 +11,7 @@ export default async function SettingsPage({
 }: {
   searchParams: Promise<{ welcome?: string }>;
 }) {
+  await requireRole("owner");
   const settings = await getSettings();
   if (!settings) notFound();
   const { welcome } = await searchParams;

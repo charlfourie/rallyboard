@@ -30,11 +30,19 @@ export function Avatar({ name, image, size = 24 }: { name: string | null; image:
       <img src={image} alt="" width={size} height={size} className="shrink-0 rounded-full" style={{ width: size, height: size }} />
     );
   }
+  // Each name gets its own steady colour so letter avatars are easy to tell apart.
+  const hue = [...(name ?? "?")].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 7);
   return (
     <span
       aria-hidden
-      className="flex shrink-0 items-center justify-center rounded-full bg-surface-2 text-muted"
-      style={{ width: size, height: size, fontSize: size * 0.45 }}
+      className="flex shrink-0 items-center justify-center rounded-full font-medium"
+      style={{
+        width: size,
+        height: size,
+        fontSize: size * 0.45,
+        background: `hsl(${hue} 45% 28%)`,
+        color: `hsl(${hue} 80% 85%)`,
+      }}
     >
       {(name ?? "?").slice(0, 1).toUpperCase()}
     </span>

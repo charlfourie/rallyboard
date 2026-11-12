@@ -41,14 +41,17 @@ export default async function BoardPage({ searchParams }: { searchParams: Promis
   return (
     <div className="space-y-6">
       <section className="flex flex-wrap items-center gap-4">
-        <GameMark name={settings.gameName} logoUrl={settings.logoUrl} size={56} />
+        {/* The header already shows the logo and name on phones, so keep the hero lean there. */}
+        <span className="hidden sm:block">
+          <GameMark name={settings.gameName} logoUrl={settings.logoUrl} size={56} />
+        </span>
         <div className="min-w-0 flex-1">
-          <h1 className="text-2xl font-bold sm:text-3xl">{settings.gameName}</h1>
+          <h1 className="sr-only text-2xl font-bold sm:not-sr-only sm:text-3xl">{settings.gameName}</h1>
           <p className="text-muted">
             {settings.tagline ?? "Suggest ideas and vote on what gets built next."}
           </p>
         </div>
-        <Link href="/ideas/new" className="btn-primary">
+        <Link href="/ideas/new" className="btn-primary w-full sm:w-auto">
           Suggest an idea
         </Link>
       </section>

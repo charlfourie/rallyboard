@@ -1,7 +1,7 @@
 import { cache } from "react";
-import { and, asc, desc, eq, ilike, isNull, or, sql, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, inArray, isNull, or, sql, type SQL } from "drizzle-orm";
 import { db } from "@/db";
-import { categories, comments, ideas, users, votes, type IdeaStatus } from "@/db/schema";
+import { categories, comments, ideas, releases, users, votes, type IdeaStatus } from "@/db/schema";
 
 export const SORTS = ["top", "new", "trending"] as const;
 export type Sort = (typeof SORTS)[number];
@@ -91,6 +91,10 @@ export const getIdea = cache(async (id: string, viewerId?: string | null) => {
       ...ideaColumns,
       mergedIntoId: ideas.mergedIntoId,
       hidden: ideas.hidden,
+      releaseId: ideas.releaseId,
+      releaseVersion: releases.version,
+      authorRole: users.role,
+      authorBanned: users.banned,
       hasVoted: viewerId
         ? sql<boolean>`exists (select 1 from ${votes} where ${votes.ideaId} = ${ideas.id} and ${votes.userId} = ${viewerId})`
         : sql<boolean>`false`,
@@ -98,6 +102,7 @@ export const getIdea = cache(async (id: string, viewerId?: string | null) => {
     .from(ideas)
     .leftJoin(categories, eq(ideas.categoryId, categories.id))
     .leftJoin(users, eq(ideas.authorId, users.id))
+    .leftJoin(releases, eq(ideas.releaseId, releases.id))
     .where(eq(ideas.id, id));
   return row ?? null;
 });
@@ -122,11 +127,68 @@ export async function getComments(ideaId: string) {
       authorName: users.name,
       authorImage: users.image,
       authorRole: users.role,
+      authorBanned: users.banned,
     })
     .from(comments)
     .leftJoin(users, eq(comments.authorId, users.id))
     .where(and(eq(comments.ideaId, ideaId), eq(comments.hidden, false)))
     .orderBy(asc(comments.createdAt));
+}
+
+/** Planned, in-progress and recently shipped ideas for the public roadmap. */
+export async function roadmapIdeas() {
+  const rows = await db
+    .select({
+      id: ideas.id,
+      title: ideas.title,
+      status: ideas.status,
+      voteCount: ideas.voteCount,
+      categoryName: categories.name,
+      categoryColor: categories.color,
+      releaseVersion: releases.version,
+      updatedAt: ideas.updatedAt,
+    })
+    .from(ideas)
+    .leftJoin(categories, eq(ideas.categoryId, categories.id))
+    .leftJoin(releases, eq(ideas.releaseId, releases.id))
+    .where(and(visible, inArray(ideas.status, ["planned", "in_progress", "shipped"])))
+    .orderBy(desc(ideas.voteCount), desc(ideas.updatedAt));
+
+  return {
+    planned: rows.filter((r) => r.status === "planned"),
+    inProgress: rows.filter((r) => r.status === "in_progress"),
+    // Only the latest shipped work, so the column stays short.
+    shipped: rows
+      .filter((r) => r.status === "shipped")
+      .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
+      .slice(0, 12),
+  };
+}
+
+/** Releases newest first, each with the ideas that shipped in it. */
+export async function releasesWithIdeas() {
+  const all = await db
+    .select({ id: releases.id, version: releases.version, title: releases.title, releasedAt: releases.releasedAt })
+    .from(releases)
+    .where(sql`${releases.releasedAt} is not null and ${releases.releasedAt} <= now()`)
+    .orderBy(desc(releases.releasedAt));
+  if (all.length === 0) return [];
+
+  const shipped = await db
+    .select({
+      id: ideas.id,
+      title: ideas.title,
+      voteCount: ideas.voteCount,
+      releaseId: ideas.releaseId,
+      categoryName: categories.name,
+      categoryColor: categories.color,
+    })
+    .from(ideas)
+    .leftJoin(categories, eq(ideas.categoryId, categories.id))
+    .where(and(visible, inArray(ideas.releaseId, all.map((r) => r.id))))
+    .orderBy(desc(ideas.voteCount));
+
+  return all.map((release) => ({ ...release, ideas: shipped.filter((i) => i.releaseId === release.id) }));
 }
 
 /** Existing ideas whose titles resemble the text, for "is this already posted?" hints. */

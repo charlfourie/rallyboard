@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { requireRole } from "@/lib/session";
 import { deleteCategory, moveCategory } from "@/app/admin/actions";
 import { getCategories } from "@/lib/settings";
 import { AddCategoryForm, EditCategoryForm } from "./category-forms";
@@ -6,6 +7,7 @@ import { AddCategoryForm, EditCategoryForm } from "./category-forms";
 export const metadata: Metadata = { title: "Categories" };
 
 export default async function CategoriesPage() {
+  await requireRole("owner");
   const categories = await getCategories();
 
   return (
