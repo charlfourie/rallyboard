@@ -7,6 +7,7 @@ const NAV = [
   { href: "/admin/inbox", label: "Inbox", ownerOnly: false },
   { href: "/admin/releases", label: "Releases", ownerOnly: false },
   { href: "/admin/team", label: "Team", ownerOnly: true },
+  { href: "/admin/discord", label: "Discord", ownerOnly: true },
   { href: "/admin/categories", label: "Categories", ownerOnly: true },
   { href: "/admin/settings", label: "Settings", ownerOnly: true },
 ];

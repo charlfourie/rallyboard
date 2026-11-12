@@ -5,13 +5,13 @@
 Players suggest ideas and vote on what you build next, on the web or straight from your Discord server. You triage, plan and ship, and everyone who voted sees it land.
 
 - **Unlimited players and votes.** No tracked-user limits, no per-seat pricing.
-- **Discord-first.** Players sign in with Discord; slash commands are on the way.
+- **Discord-first.** Players sign in with Discord, and can suggest and vote with `/rally` without leaving your server.
 - **Fewer duplicates.** Similar ideas are suggested while players type, and moderators can merge the rest.
 - **Close the loop.** A public roadmap and release notes show players what their votes changed.
 - **Your game's brand.** Your name, logo and accent colour throughout.
 - **Self-host in minutes** on Vercel or any server with Docker.
 
-> **Status: early development.** Posting, voting, moderation, the public roadmap and releases all work. Discord commands are next. See the [roadmap](#roadmap).
+> **Status: early development.** Posting, voting, moderation, roadmap, releases and Discord commands all work. Packaging and a public demo are next. See the [roadmap](#roadmap).
 
 ---
 
@@ -58,6 +58,23 @@ Logos are stored in the `uploads` volume and the database in `pgdata`, so both s
 4. Save. Discord sign-in now works.
 
 Players are asked only for their Discord username, avatar and email.
+
+### Optional: `/rally` commands and announcements
+
+Players can suggest ideas, vote and check statuses without leaving Discord, and status changes are posted to a channel you pick.
+
+1. In the Developer Portal, copy **General Information → Public Key** into `DISCORD_PUBLIC_KEY`.
+2. Open **Bot**, click **Reset Token**, and put the token in `DISCORD_BOT_TOKEN`. Keep it secret.
+3. Redeploy, then open **Admin → Discord** on your board and follow the steps there: paste the Interactions Endpoint URL into the portal, invite the bot, register `/rally`, and pick a channel.
+
+| Command | What it does |
+| --- | --- |
+| `/rally suggest` | Opens a form and posts the idea to the board |
+| `/rally vote` | Votes for an idea (or removes the vote), with search as you type |
+| `/rally top` | Shows the five most wanted ideas with vote buttons |
+| `/rally status` | Shows where an idea stands |
+
+Players who use `/rally` before visiting the website get a board account automatically, and signing in with Discord later uses that same account.
 
 ### Optional: email sign-in
 
@@ -107,7 +124,7 @@ After changing `src/db/schema.ts`, run `npm run db:generate` to create a migrati
 1. **Foundation** ✅ setup, Discord and email sign-in, branding, categories
 2. **Board** ✅ post ideas, vote, comment, filter and search, similar-idea hints
 3. **Admin and roadmap** ✅ moderation inbox, statuses with history, merging duplicates, hide, lock and ban, moderators, public roadmap and releases
-4. **Discord:** `/rally suggest`, `/rally vote`, `/rally top`, status announcements
+4. **Discord** ✅ `/rally suggest`, `/rally vote`, `/rally top`, `/rally status`, status announcements
 5. **Packaging:** public demo, one-click deploy, screenshots
 
 Ideas and bug reports are welcome in [Issues](https://github.com/charlfourie/rallyboard/issues).

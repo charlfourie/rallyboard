@@ -53,7 +53,7 @@ export async function listIdeas(filters: BoardFilters, viewerId?: string | null)
   if (q) {
     const pattern = `%${escapeLike(q)}%`;
     conditions.push(
-      or(ilike(ideas.title, pattern), ilike(ideas.body, pattern), sql`${ideas.title} % ${q}`),
+      or(ilike(ideas.title, pattern), ilike(ideas.body, pattern), sql`word_similarity(${q}, ${ideas.title}) > 0.35`),
     );
   }
 

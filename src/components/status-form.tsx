@@ -18,6 +18,9 @@ type Props = {
 export function StatusForm({ ideaId, status, releaseId, releases, compact = false }: Props) {
   const [state, action, pending] = useActionState(updateIdeaStatus, undefined);
   const [selected, setSelected] = useState<IdeaStatus>(status);
+  const [release, setRelease] = useState(releaseId ?? "");
+  // Only offer Save once something actually differs from what's stored.
+  const changed = selected !== status || (selected === "shipped" && release !== (releaseId ?? ""));
 
   return (
     <form action={action} className="flex flex-wrap items-center gap-2">
@@ -46,7 +49,8 @@ export function StatusForm({ ideaId, status, releaseId, releases, compact = fals
           <select
             id={`release-${ideaId}`}
             name="releaseId"
-            defaultValue={releaseId ?? ""}
+            value={release}
+            onChange={(e) => setRelease(e.target.value)}
             className="input w-auto py-1.5"
           >
             <option value="">No version</option>
@@ -58,10 +62,10 @@ export function StatusForm({ ideaId, status, releaseId, releases, compact = fals
           </select>
         </>
       )}
-      <button type="submit" className={`btn-secondary ${compact ? "px-3 py-1.5" : ""}`} disabled={pending}>
+      <button type="submit" className={`btn-secondary ${compact ? "px-3 py-1.5" : ""}`} disabled={pending || !changed}>
         {pending ? "Saving…" : "Save"}
       </button>
-      <FormStatus state={state} />
+      {(state?.error || !changed) && <FormStatus state={state} />}
     </form>
   );
 }

@@ -1,10 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { and, eq, ne, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/db";
 import { comments, ideas, releases, statusEvents, users, votes, type Role } from "@/db/schema";
+import { announcePendingStatusChanges } from "@/lib/discord";
 import { errorMessage, type FormState } from "@/lib/form";
 import { assertRole } from "@/lib/session";
 import { STATUSES } from "@/lib/status";
@@ -56,6 +58,8 @@ export async function updateIdeaStatus(_prev: FormState, formData: FormData): Pr
     return { error: errorMessage(error) };
   }
   refresh(ideaId);
+  // Tell the Discord announcement channel, after the response is sent.
+  after(() => announcePendingStatusChanges().catch((error) => console.error("Announcement failed:", error)));
   return { success: "Saved" };
 }
 
