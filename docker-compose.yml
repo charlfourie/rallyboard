@@ -1,6 +1,7 @@
 # Runs Rallyboard and Postgres on any server with Docker.
 #   1. cp .env.example .env   and fill in AUTH_SECRET, AUTH_URL and the Discord values
 #   2. docker compose up -d
+# The board listens on port 3000; set PORT in .env to publish it on a different host port.
 # The DATABASE_URL in .env is ignored here; the app talks to the bundled database.
 
 services:
@@ -10,6 +11,7 @@ services:
     env_file: .env
     environment:
       DATABASE_URL: postgres://rallyboard:${POSTGRES_PASSWORD:-rallyboard}@db:5432/rallyboard
+      PORT: "3000" # inside the container; PORT in .env only changes the host port below
     ports:
       - "${PORT:-3000}:3000"
     volumes:

@@ -4,7 +4,9 @@
 
 Players suggest ideas and vote on what you build next, on the web or straight from your Discord server. You triage, plan and ship, and everyone who voted sees it land.
 
-**[Live demo → rallyboard.space](https://rallyboard.space)**, a board for *Starfall Tactics*, a fictional space-tactics game with a demo community.
+**[Live demo → rallyboard.space](https://rallyboard.space)**, a board for *Starfall Tactics*, a fictional space-tactics game with a demo community. Sign in and try anything; the demo resets every night.
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fcharlfourie%2Frallyboard&project-name=rallyboard&repository-name=rallyboard&env=AUTH_SECRET%2CAUTH_DISCORD_ID%2CAUTH_DISCORD_SECRET%2COWNER_DISCORD_ID&envDescription=A%20random%20session%20secret%2C%20your%20Discord%20application%27s%20Client%20ID%20and%20Secret%2C%20and%20your%20own%20Discord%20user%20ID%20so%20only%20you%20can%20claim%20the%20board.&envLink=https%3A%2F%2Fgithub.com%2Fcharlfourie%2Frallyboard%23deploy-to-vercel&stores=%5B%7B%22type%22%3A%22integration%22%2C%22integrationSlug%22%3A%22neon%22%2C%22productSlug%22%3A%22neon%22%2C%22protocol%22%3A%22storage%22%7D%2C%7B%22type%22%3A%22blob%22%2C%22access%22%3A%22public%22%7D%5D)
 
 ![The Starfall Tactics board: ideas ranked by votes, with statuses, categories and comment counts](docs/screenshots/board.png)
 
@@ -15,13 +17,13 @@ Players suggest ideas and vote on what you build next, on the web or straight fr
 - **Your game's brand.** Your name, logo and accent colour throughout.
 - **Self-host in minutes** on Vercel or any server with Docker.
 
-> **Status: early development.** Posting, voting, moderation, roadmap, releases and Discord commands all work. Packaging (one-click deploy, nightly demo reset) is next. See the [roadmap](#roadmap).
+> **Status: beta.** Everything described here works and is running at [rallyboard.space](https://rallyboard.space). Feedback and bug reports are welcome in [Issues](https://github.com/charlfourie/rallyboard/issues).
 
 ## Contents
 
 - [How it works](#how-it-works)
 - [Features](#features)
-- [Quick start: Vercel](#quick-start-vercel-easiest)
+- [Deploy to Vercel](#deploy-to-vercel)
 - [Quick start: Docker](#quick-start-docker-any-server)
 - [Set up Discord](#set-up-discord-sign-in)
 - [Use your own domain](#use-your-own-domain)
@@ -107,24 +109,38 @@ When an idea becomes **Planned**, **In progress** or **Shipped**, Rallyboard pos
 
 ---
 
-## Quick start: Vercel (easiest)
+## Deploy to Vercel
 
-You need a GitHub account, a free [Vercel](https://vercel.com) account and a [Discord application](#set-up-discord-sign-in).
+The quickest way: free Vercel and Neon plans are enough.
 
-1. **Fork or import this repo** into Vercel: *Add New → Project → Import* `charlfourie/rallyboard`.
-2. **Add a database.** In the new project, open *Storage* and connect a **Neon** Postgres database (the free plan is plenty). This sets `DATABASE_URL` for you.
-3. **Add a Blob store** for logo uploads: *Storage → Blob*. This sets `BLOB_READ_WRITE_TOKEN`.
-4. **Add environment variables** under *Settings → Environment Variables*:
+1. **Create a [Discord application](#set-up-discord-sign-in)** first, so you have its Client ID and Client Secret to hand.
+2. **Click the button:**
+
+   [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fcharlfourie%2Frallyboard&project-name=rallyboard&repository-name=rallyboard&env=AUTH_SECRET%2CAUTH_DISCORD_ID%2CAUTH_DISCORD_SECRET%2COWNER_DISCORD_ID&envDescription=A%20random%20session%20secret%2C%20your%20Discord%20application%27s%20Client%20ID%20and%20Secret%2C%20and%20your%20own%20Discord%20user%20ID%20so%20only%20you%20can%20claim%20the%20board.&envLink=https%3A%2F%2Fgithub.com%2Fcharlfourie%2Frallyboard%23deploy-to-vercel&stores=%5B%7B%22type%22%3A%22integration%22%2C%22integrationSlug%22%3A%22neon%22%2C%22productSlug%22%3A%22neon%22%2C%22protocol%22%3A%22storage%22%7D%2C%7B%22type%22%3A%22blob%22%2C%22access%22%3A%22public%22%7D%5D)
+
+   Vercel copies the repo to your GitHub account, creates a **Neon** Postgres database and a **Blob** store for logos, and asks for:
 
    | Name | Value |
    | --- | --- |
-   | `AUTH_SECRET` | A random string. Run `npx auth secret` or use any password generator (32+ characters). |
+   | `AUTH_SECRET` | A random string of 32+ characters. Run `npx auth secret` or use a password generator. |
    | `AUTH_DISCORD_ID` | Your Discord application's Client ID |
-   | `AUTH_DISCORD_SECRET` | Your Discord application's Client Secret (mark it **Sensitive**) |
-   | `OWNER_DISCORD_ID` | Your Discord user ID, so only you can claim the board (recommended) |
+   | `AUTH_DISCORD_SECRET` | Your Discord application's Client Secret |
+   | `OWNER_DISCORD_ID` | Your Discord user ID, so only you can claim the board ([how to find it](#set-up-discord-sign-in)) |
 
-5. **Deploy.** Database migrations run automatically during each build.
-6. **Claim your board:** open the site, sign in with Discord, and fill in your game's name. Then upload a logo under *Admin → Settings*.
+3. **Add the redirect in Discord.** Once deployed, add `https://<your project>.vercel.app/api/auth/callback/discord` under *OAuth2 → Redirects*.
+4. **Claim your board:** open the site, sign in with Discord, and fill in your game's name. Then upload a logo under *Admin → Settings*.
+
+Database migrations run automatically on every deploy, and updates arrive when you sync your fork on GitHub.
+
+<details>
+<summary>Setting it up by hand instead</summary>
+
+1. Import `charlfourie/rallyboard` (or your fork) in Vercel: *Add New → Project → Import*.
+2. Under *Storage*, connect a **Neon** database (sets `DATABASE_URL`) and a **Blob** store (sets `BLOB_READ_WRITE_TOKEN`).
+3. Add the four variables from the table above under *Settings → Environment Variables*, marking `AUTH_DISCORD_SECRET` as **Sensitive**.
+4. Deploy, then follow steps 3 and 4 above.
+
+</details>
 
 ## Quick start: Docker (any server)
 
@@ -135,7 +151,7 @@ cp .env.example .env      # then fill in AUTH_SECRET, AUTH_URL and the Discord v
 docker compose up -d
 ```
 
-The board runs on port 3000 with its own Postgres database. Put it behind a reverse proxy (Caddy, Nginx, Traefik) for HTTPS, and set `AUTH_URL` to the public address, for example `https://feedback.yourgame.com`.
+The board runs on port 3000 with its own Postgres database (set `PORT` in `.env` to use another port). Put it behind a reverse proxy (Caddy, Nginx, Traefik) for HTTPS, and set `AUTH_URL` to the public address, for example `https://feedback.yourgame.com`.
 
 Logos are stored in the `uploads` volume and the database in `pgdata`, so both survive upgrades.
 
@@ -192,7 +208,8 @@ All settings live in environment variables; see [`.env.example`](.env.example) f
 | `DISCORD_PUBLIC_KEY`, `DISCORD_BOT_TOKEN` | No | `/rally` commands and status announcements |
 | `EMAIL_SERVER`, `EMAIL_FROM` | No | Email magic-link sign-in |
 | `BLOB_READ_WRITE_TOKEN` | No | Vercel Blob for logos; otherwise saved to `./data/uploads` |
-| `DEMO_SEED` | No | `true` fills an empty board with demo content on each build (for demo sites only) |
+| `DEMO_SEED` | No | `true` makes this a demo site: demo content is added on each build and the board is wiped and refilled nightly |
+| `CRON_SECRET` | Demo only | Protects the nightly reset; Vercel sends it automatically. Any random string. |
 
 ## Local development
 
@@ -244,6 +261,7 @@ scripts/                    Migration runner and demo seed
 - **Counts are stored, not computed.** Vote and comment counts live on each idea and change in the same transaction as the vote or comment, so the board stays fast. Votes lock the idea's row, so rapid clicks can't drift the count.
 - **Discord runs serverless.** Slash commands arrive as signed HTTP requests (no always-on bot process), so it works on Vercel's free plan. Every request's Ed25519 signature is checked, and requests older than five minutes are refused.
 - **Announcements never block your work.** They're sent after the page responds. If Discord is unreachable, the status still saves and the announcement retries on the next change. Only changes from the last day are sent, so connecting Discord later doesn't flood the channel with history.
+- **The demo resets itself.** On a site with `DEMO_SEED=true`, a Vercel Cron job calls `/api/cron/reset-demo` at midnight UTC, clears everything visitors posted and restores *Starfall Tactics*. On every other board the job does nothing.
 - **One account per player.** A player who votes in Discord first gets an account linked to their Discord identity, so signing in on the website later uses the same account.
 
 ## Troubleshooting
@@ -263,7 +281,7 @@ scripts/                    Migration runner and demo seed
 2. **Board** ✅ post ideas, vote, comment, filter and search, similar-idea hints
 3. **Admin and roadmap** ✅ moderation inbox, statuses with history, merging duplicates, hide, lock and ban, moderators, public roadmap and releases
 4. **Discord** ✅ `/rally suggest`, `/rally vote`, `/rally top`, `/rally status`, status announcements
-5. **Packaging:** nightly demo reset, one-click Deploy to Vercel button, Docker image checks
+5. **Packaging** ✅ one-click Deploy to Vercel, nightly demo reset, tested Docker setup
 
 Ideas and bug reports are welcome in [Issues](https://github.com/charlfourie/rallyboard/issues).
 
