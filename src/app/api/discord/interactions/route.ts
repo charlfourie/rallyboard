@@ -208,7 +208,7 @@ async function handleCommand(interaction: Interaction) {
 
     const lines = top.map(
       (idea, i) =>
-        `**${i + 1}. [${idea.title}](${base}/ideas/${idea.id})**\n${idea.voteCount} ${idea.voteCount === 1 ? "vote" : "votes"} · ${statusInfo(idea.status).label}`,
+        `**${i + 1}.** [${idea.title}](${base}/ideas/${idea.id}) · ${idea.voteCount} ${idea.voteCount === 1 ? "vote" : "votes"} · ${statusInfo(idea.status).label}`,
     );
     return reply(
       "",
@@ -217,7 +217,7 @@ async function handleCommand(interaction: Interaction) {
           {
             title: `Most wanted in ${config.gameName}`,
             url: base,
-            description: lines.join("\n\n").slice(0, 4000),
+            description: lines.join("\n").slice(0, 4000),
             color: accentInt(config.accentColor),
             footer: { text: "Vote with the buttons, or /rally vote" },
           },

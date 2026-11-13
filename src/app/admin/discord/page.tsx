@@ -34,6 +34,16 @@ async function loadChannels() {
   }
 }
 
+/** Whether the /rally command exists on Discord. */
+async function isRegistered(appId: string) {
+  try {
+    const commands = await discordApi<{ name: string }[]>(`/applications/${appId}/commands`);
+    return commands.some((c) => c.name === "rally");
+  } catch {
+    return false;
+  }
+}
+
 function Step({ n, title, done, children }: { n: number; title: string; done?: boolean; children: React.ReactNode }) {
   return (
     <li className="card space-y-3 p-5">
@@ -58,7 +68,9 @@ export default async function DiscordPage() {
   const board = await getSettings();
   const base = await boardUrl();
   const keysReady = Boolean(appId && publicKey && botToken);
-  const { groups, error } = keysReady ? await loadChannels() : { groups: [], error: null };
+  const [{ groups, error }, registered] = keysReady
+    ? await Promise.all([loadChannels(), isRegistered(appId)])
+    : [{ groups: [], error: null }, false];
   const inviteUrl = `https://discord.com/oauth2/authorize?client_id=${appId}&scope=bot+applications.commands&permissions=${BOT_PERMISSIONS}`;
 
   return (
@@ -106,8 +118,12 @@ export default async function DiscordPage() {
           <p>It only asks to read channels, send messages and add slash commands.</p>
         </Step>
 
-        <Step n={4} title="Register the /rally command">
-          <p>Run this again whenever you rename the game.</p>
+        <Step n={4} title="Register the /rally command" done={registered}>
+          {registered ? (
+            <p className="text-success">/rally is registered. Run this again whenever you rename the game.</p>
+          ) : (
+            <p>Not registered yet. Click below, then reload Discord. Run this again whenever you rename the game.</p>
+          )}
           <RegisterButton disabled={!keysReady} />
         </Step>
 
